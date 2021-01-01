@@ -3,13 +3,22 @@
 namespace App\Http\Controllers\Design;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\DesignResource;
 use App\Jobs\UploadImage;
 use App\Models\User;
+use App\Repositories\Contracts\IDesign;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class UploadController extends Controller
 {
+    protected $designs;
+
+    public function __construct(IDesign $designs)
+    {
+        $this->designs = $designs;
+    }
+
     public function upload(Request $request)
     {
         $request->validate([
@@ -28,7 +37,13 @@ class UploadController extends Controller
         $tmp = $image->storeAs('uploads/original', $filename, 'tmp');
 
         //create the database record for the design
-        $design = auth()->user()->designs()->create([
+        // $design = auth()->user()->designs()->create([
+        //     'image' => $filename,
+        //     'disk' => config('site.upload_disk')
+        // ]);
+
+        $design = $this->designs->create([
+            'user_id' => auth()->user()->id,
             'image' => $filename,
             'disk' => config('site.upload_disk')
         ]);
@@ -36,6 +51,6 @@ class UploadController extends Controller
         //dispatch a job to handle the image manipulation
         $this->dispatch(new UploadImage($design));
 
-        return response()->json($design, 200);
+        return new DesignResource($design);
     }
 }

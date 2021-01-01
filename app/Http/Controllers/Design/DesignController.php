@@ -4,13 +4,33 @@ namespace App\Http\Controllers\Design;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\DesignResource;
-use App\Models\Design;
+use App\Repositories\Contracts\IDesign;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class DesignController extends Controller
 {
+    protected $designs;
+
+    public function __construct(IDesign $designs)
+    {
+        $this->designs = $designs;
+    }
+
+    public function index()
+    {
+        $designs = $this->designs->all();
+
+        return DesignResource::collection($designs);
+    }
+
+    public function findDesign($id)
+    {
+        $design = $this->designs->find($id);
+        return new DesignResource($design);
+    }
+
     public function update(Request $request, $id)
     {
 
@@ -20,10 +40,10 @@ class DesignController extends Controller
             'tags' => ['required']
         ]);
 
-        $design = Design::findorfail($id);
+        $design = $this->designs->find($id);
         $this->authorize('update', $design);
 
-        $design->update([
+        $this->designs->update($id, [
             'title' => $request->title,
             'description' => $request->description,
             'slug' => Str::slug($request->title),
@@ -31,14 +51,14 @@ class DesignController extends Controller
         ]);
 
         // apply tags
-        $design->retag($request->tags);
+        $this->designs->applyTags($id, $request->tags);
 
         return new DesignResource($design);
     }
 
     public function destroy($id)
     {
-        $design = Design::findorfail($id);
+        $design = $this->designs->find($id);
         $this->authorize('delete', $design);
 
         // delete files associated to the record
@@ -48,10 +68,10 @@ class DesignController extends Controller
             }
         }
 
-        $design->detag();
+        $this->designs->removeTags($id);
 
         // delete record from db
-        $design->delete();
+        $this->designs->delete($id);
 
         return response()->json([
             "message" => "Record deleted"

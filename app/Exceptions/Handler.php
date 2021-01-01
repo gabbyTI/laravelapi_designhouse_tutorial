@@ -2,7 +2,6 @@
 
 namespace App\Exceptions;
 
-use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
@@ -65,6 +64,16 @@ class Handler extends ExceptionHandler
             );
         }
 
+        if ($exception instanceof UnspecifiedModel && $request->expectsJson()) {
+            return response()->json(
+                [
+                    "errors" => [
+                        "message" => "The model is not specified"
+                    ]
+                ],
+                404
+            );
+        }
         return parent::render($request, $exception);
     }
 }

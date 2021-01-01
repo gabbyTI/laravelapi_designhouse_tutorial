@@ -9,9 +9,17 @@ use App\Http\Controllers\Design\DesignController;
 use App\Http\Controllers\Design\UploadController;
 use App\Http\Controllers\User\MeController;
 use App\Http\Controllers\User\SettingsController;
+use App\Http\Controllers\User\UserController;
 
 // Puplic Routes
 Route::get('me', [MeController::class, 'getMe']);
+
+// Get Designs
+Route::get('designs', [DesignController::class, 'index']);
+Route::get('designs/{id}', [DesignController::class, 'findDesign']);
+
+// Get Users
+Route::get('users', [UserController::class, 'index']);
 
 // Route group for authenticated users only
 Route::group(['middleware' => ['auth:api']], function () {
