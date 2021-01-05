@@ -15,7 +15,7 @@ class DesignResource extends JsonResource
     public function toArray($request)
     {
         return [
-            "id" => 1,
+            "id" => $this->id,
             "user" => new UserResource($this->user),
             "title" => $this->title,
             "description" => $this->description,
