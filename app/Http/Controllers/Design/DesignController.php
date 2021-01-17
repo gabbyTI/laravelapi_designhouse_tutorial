@@ -5,12 +5,15 @@ namespace App\Http\Controllers\Design;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\DesignResource;
 use App\Repositories\Contracts\IDesign;
+use App\Repositories\Eloquent\Criteria\EagerLoad;
 use App\Repositories\Eloquent\Criteria\ForUser;
 use App\Repositories\Eloquent\Criteria\IsLive;
 use App\Repositories\Eloquent\Criteria\LatestFirst;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+
+use function PHPUnit\Framework\returnValueMap;
 
 class DesignController extends Controller
 {
@@ -20,22 +23,27 @@ class DesignController extends Controller
     {
         $this->designs = $designs;
     }
-
     public function index()
     {
-        $designs = $this->designs->withCriteria(new LatestFirst, new IsLive, new ForUser(auth()->user()->id))->all();
+        $designs = $this->designs->withCriteria([
+            new LatestFirst,
+            new IsLive,
+            new ForUser(auth()->id()),
+            new EagerLoad('user', 'comments'),
+
+        ])->all();
 
         return DesignResource::collection($designs);
     }
-
     public function findDesign($id)
     {
         $design = $this->designs->find($id);
         return new DesignResource($design);
     }
-
     public function update(Request $request, $id)
     {
+        $design = $this->designs->find($id);
+        $this->authorize('update', $design);
 
         $request->validate([
             'title' => ['required', 'unique:designs,title,' . $id],
@@ -43,8 +51,6 @@ class DesignController extends Controller
             'tags' => ['required']
         ]);
 
-        $design = $this->designs->find($id);
-        $this->authorize('update', $design);
 
         $this->designs->update($id, [
             'title' => $request->title,
@@ -58,7 +64,6 @@ class DesignController extends Controller
 
         return new DesignResource($design);
     }
-
     public function destroy($id)
     {
         $design = $this->designs->find($id);
@@ -79,5 +84,19 @@ class DesignController extends Controller
         return response()->json([
             "message" => "Record deleted"
         ]);
+    }
+
+    public function like($id)
+    {
+        $this->designs->like($id);
+
+        return response()->json(["message" => "Successful"]);
+    }
+
+    public function checkIfUserHasLiked($designId)
+    {
+        $is_liked = $this->designs->isLikedByUser($designId);
+
+        return response()->json(["Liked" => $is_liked]);
     }
 }

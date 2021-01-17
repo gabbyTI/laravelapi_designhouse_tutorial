@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\VerificationController;
+use App\Http\Controllers\Design\CommentController;
 use App\Http\Controllers\Design\DesignController;
 use App\Http\Controllers\Design\UploadController;
 use App\Http\Controllers\User\MeController;
@@ -31,6 +32,15 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::post('designs', [UploadController::class, 'upload']);
     Route::put('designs/{id}', [DesignController::class, 'update']);
     Route::delete('designs/{id}', [DesignController::class, 'destroy']);
+
+    // Like and Unlike
+    Route::post('designs/{id}/like', [DesignController::class, 'like']);
+    Route::get('designs/{id}/liked', [DesignController::class, 'checkIfUserHasLiked']);
+
+    //Comments
+    Route::post('designs/{id}/ ', [CommentController::class, 'store']);
+    Route::put('comments/{id}', [CommentController::class, 'update']);
+    // Route::delete('designs/{id}/comments', [CommentController::class, 'destroy']);
 });
 
 // Route group for guest users only

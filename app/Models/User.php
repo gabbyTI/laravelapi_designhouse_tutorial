@@ -11,7 +11,9 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Grimzy\LaravelMysqlSpatial\Eloquent\SpatialTrait;
 
-class User extends Authenticatable implements JWTSubject, MustVerifyEmail
+class User extends Authenticatable implements
+    JWTSubject,
+    MustVerifyEmail
 {
     use HasFactory, Notifiable;
     use SpatialTrait;
@@ -89,5 +91,10 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
     public function designs()
     {
         return $this->hasMany(Design::class);
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
     }
 }

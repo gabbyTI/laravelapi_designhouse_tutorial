@@ -16,12 +16,12 @@ class DesignResource extends JsonResource
     {
         return [
             "id" => $this->id,
-            "user" => new UserResource($this->user),
             "title" => $this->title,
             "description" => $this->description,
             "slug" => $this->slug,
             "images" => $this->images,
             "is_live" => $this->is_live,
+            "likes_count" => $this->likes()->count(),
             "disk" => $this->disk,
             "tag_lists" => [
                 "tags" => $this->tagArray,
@@ -35,6 +35,8 @@ class DesignResource extends JsonResource
                 "updated_at_human" => $this->updated_at->diffForHumans(),
                 "updated_at" => $this->updated_at,
             ],
+            "comments" => CommentResource::collection($this->whenLoaded('comments')),
+            "user" => new UserResource($this->whenLoaded('user')),
         ];
     }
 }
