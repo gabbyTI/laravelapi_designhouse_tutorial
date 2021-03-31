@@ -15,7 +15,21 @@ class CreateTeamsTable extends Migration
     {
         Schema::create('teams', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
+            $table->string('slug')->unique()->index();
+            $table->unsignedBigInteger('owner_id')->index();
             $table->timestamps();
+
+            $table->foreign('owner_id')->references('id')->on('users');
+        });
+
+        Schema::create('team_user', function (Blueprint $table) {
+            $table->unsignedBigInteger('team_id');
+            $table->unsignedBigInteger('user_id');
+            $table->timestamps();
+
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('team_id')->references('id')->on('teams')->onDelete('cascade');
         });
     }
 
@@ -27,5 +41,6 @@ class CreateTeamsTable extends Migration
     public function down()
     {
         Schema::dropIfExists('teams');
+        Schema::dropIfExists('team_user');
     }
 }

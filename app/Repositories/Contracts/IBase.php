@@ -12,4 +12,5 @@ interface IBase
     public function create(array $data);
     public function update($id, array $data);
     public function delete($id);
+    public function removeUserFromTeam($team, $user_id);
 }

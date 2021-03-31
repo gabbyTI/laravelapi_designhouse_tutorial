@@ -36,6 +36,7 @@ class UploadController extends Controller
         // move to temp storage (tmp)
         $tmp = $image->storeAs('uploads/original', $filename, 'tmp');
 
+
         //create the database record for the design
         // $design = auth()->user()->designs()->create([
         //     'image' => $filename,
@@ -49,7 +50,9 @@ class UploadController extends Controller
         ]);
 
         //dispatch a job to handle the image manipulation
-        $this->dispatch(new UploadImage($design));
+        UploadImage::dispatch($design);
+        // $this->dispatch('App\Jobs\UploadImage', $design);
+        // dd($tmp);
 
         return new DesignResource($design);
     }

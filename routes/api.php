@@ -8,11 +8,14 @@ use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\Design\CommentController;
 use App\Http\Controllers\Design\DesignController;
 use App\Http\Controllers\Design\UploadController;
+use App\Http\Controllers\InvitationsController;
+use App\Http\Controllers\TeamsController;
 use App\Http\Controllers\User\MeController;
 use App\Http\Controllers\User\SettingsController;
 use App\Http\Controllers\User\UserController;
 
-// Puplic Routes
+// PUBLIC ROUTES
+
 Route::get('me', [MeController::class, 'getMe']);
 
 // Get Designs
@@ -21,6 +24,9 @@ Route::get('designs/{id}', [DesignController::class, 'findDesign']);
 
 // Get Users
 Route::get('users', [UserController::class, 'index']);
+
+//Teams
+Route::get('teams/slug/{slug}', [TeamsController::class, 'findBySlug']);
 
 // Route group for authenticated users only
 Route::group(['middleware' => ['auth:api']], function () {
@@ -38,9 +44,24 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::get('designs/{id}/liked', [DesignController::class, 'checkIfUserHasLiked']);
 
     //Comments
-    Route::post('designs/{id}/ ', [CommentController::class, 'store']);
+    Route::post('designs/{id}/comment ', [CommentController::class, 'store']);
     Route::put('comments/{id}', [CommentController::class, 'update']);
-    // Route::delete('designs/{id}/comments', [CommentController::class, 'destroy']);
+    Route::delete('designs/{id}/comments', [CommentController::class, 'destroy']);
+
+    //Teams
+    Route::post('teams', [TeamsController::class, 'store']);
+    Route::get('teams/{id}', [TeamsController::class, 'findById']);
+    Route::get('teams', [TeamsController::class, 'index']);
+    Route::get('users/teams', [TeamsController::class, 'fetchUserTeams']);
+    Route::put('teams/{id}', [TeamsController::class, 'update']);
+    Route::delete('teams/{id}', [TeamsController::class, 'destroy']);
+    Route::delete('team/{team_id}/user/{user_id}', [TeamsController::class, 'removeFromTeam']);
+
+    //Invitation
+    Route::post('invitation/{teamId}', [InvitationsController::class, 'invite']);
+    Route::post('invitation/{id}/resend', [InvitationsController::class, 'resend']);
+    Route::post('invitation/{id}/respond', [InvitationsController::class, 'respond']);
+    Route::delete('invitation/{id}', [InvitationsController::class, 'destroy']);
 });
 
 // Route group for guest users only

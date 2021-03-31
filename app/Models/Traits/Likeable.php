@@ -49,12 +49,6 @@ trait Likeable
 
         if (!auth()->check()) return;
 
-        // check if current user has already liked the model
-
-        if ($this->isLikedByUser(auth()->id())) {
-            return;
-        }
-
         $this->likes()->where('user_id', auth()->id())->delete();
     }
 
